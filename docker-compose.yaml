@@ -1,0 +1,40 @@
+version: '3'
+services:
+  tp1_logger_server:
+    container_name: tp1_logger_server
+    image: tp1_logger_server:latest
+    entrypoint: python3 /src/logger_server/main.py
+    environment:
+      PYTHONPATH: /
+    networks:
+      - tp1_network
+    volumes:
+      - ./logs:/logs
+
+  tp1_query_server:
+    container_name: tp1_query_server
+    image: tp1_query_server:latest
+    entrypoint: python3 /src/query_server/main.py
+    environment:
+      PYTHONPATH: /
+    networks:
+      - tp1_network
+    volumes:
+      - ./logs:/logs
+
+  tp1_client:
+    container_name: tp1_client
+    image: tp1_client:latest
+    entrypoint: python3 /src/client/main.py
+    environment:
+      PYTHONPATH: /
+    networks:
+      - tp1_network
+    depends_on:
+      - tp1_logger_server
+      - tp1_query_server
+
+networks:
+  tp1_network:
+    ipam:
+      driver: default
