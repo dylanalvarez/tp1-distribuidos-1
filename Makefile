@@ -8,8 +8,7 @@ default: docker-build
 all:
 
 docker-build:
-	docker build -f ./src/logger_server/Dockerfile -t "tp1_logger_server:latest" .
-	docker build -f ./src/query_server/Dockerfile -t "tp1_query_server:latest" .
+	docker build -f ./src/server/Dockerfile -t "tp1_server:latest" .
 	docker build -f ./src/client/Dockerfile -t "tp1_client:latest" .
 	# Execute this command from time to time to clean up intermediate stages generated 
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 

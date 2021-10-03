@@ -14,8 +14,7 @@ class Query:
     pattern: Optional[str]
 
 
-def parse_query(query_str):
-    query_dict = json.loads(query_str)
+def parse_query(query_dict):
     start_timestamp = query_dict.get('start_timestamp')
     end_timestamp = query_dict.get('end_timestamp')
     pattern = query_dict.get('pattern')

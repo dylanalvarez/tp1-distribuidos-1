@@ -12,8 +12,7 @@ class Log:
     timestamp: datetime
 
 
-def parse_log(log_str):
-    log_dict = json.loads(log_str)
+def parse_log(log_dict):
     return Log(
         app_id=log_dict['app_id'],
         message=log_dict['message'],

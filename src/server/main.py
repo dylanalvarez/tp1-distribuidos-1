@@ -3,13 +3,13 @@ import logging
 
 from src.common.initialize_config import initialize_config
 from src.common.initialize_log import initialize_log
-from src.query_server.search_logs import search_logs
-from src.common.server import Server
+from src.server.process_message import process_message
+from src.server.server import Server
 
 
 def generate_response(msg, client_sock):
     logging.info('Message received from connection {}. Msg: {}'.format(client_sock.getpeername(), msg))
-    return "RESULT: {}\n".format(search_logs(msg))
+    return process_message(msg)
 
 
 def main():

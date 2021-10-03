@@ -1,9 +1,10 @@
+import json
 import os
 from datetime import timedelta
 
-from src.common.get_filename import get_filename
-from src.common.log import parse_log
-from src.query_server.query import parse_query
+from src.server.get_filename import get_filename
+from src.server.log import parse_log
+from src.server.query import parse_query
 
 
 def get_filenames(app_id, start_timestamp, end_timestamp):
@@ -25,8 +26,8 @@ def does_match(log, query):
     return True
 
 
-def search_logs(query_str):
-    query = parse_query(query_str)
+def search_logs(query_dict):
+    query = parse_query(query_dict)
     result = []
     if query.start_timestamp:
         filenames = get_filenames(query.app_id, query.start_timestamp, query.end_timestamp)
@@ -39,9 +40,12 @@ def search_logs(query_str):
         try:
             with open(filename) as file:
                 for line in file:
-                    log = parse_log(line)
+                    line = line[:-1]
+                    print('la linea')
+                    print(line)
+                    log = parse_log(json.loads(line))
                     if does_match(log, query):
-                        result.append(line[:-1])
+                        result.append(line)
         except FileNotFoundError:
             pass
     return f'[{", ".join(result)}]'
