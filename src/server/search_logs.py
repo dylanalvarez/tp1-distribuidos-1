@@ -41,8 +41,6 @@ def search_logs(query_dict):
             with open(filename) as file:
                 for line in file:
                     line = line[:-1]
-                    print('la linea')
-                    print(line)
                     log = parse_log(json.loads(line))
                     if does_match(log, query):
                         result.append(line)
