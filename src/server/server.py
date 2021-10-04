@@ -26,10 +26,11 @@ def handle_client_requests(index, request_queue, generate_response, open_filenam
             client_sock.close()
         except _queue.Empty:
             pass
+    logging.debug(f'WORKER {index} exiting gracefully')
 
 
 class Server:
-    def __init__(self, port, listen_backlog, generate_response):
+    def __init__(self, port, listen_backlog, worker_count, generate_response):
         # Initialize src socket
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.settimeout(1.0)
@@ -42,7 +43,7 @@ class Server:
         self.manager = Manager()
         self.available_process_indices = self.manager.Queue()
         self.open_filenames = self.manager.dict()
-        for index in range(10):
+        for index in range(worker_count):
             self.available_process_indices.put(index)
             request_queue = Queue()
             self.process_queues.append(request_queue)

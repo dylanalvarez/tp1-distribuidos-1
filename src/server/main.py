@@ -13,7 +13,7 @@ def generate_response(msg, client_sock, open_filenames):
 
 
 def main():
-    config_params = initialize_config([('server_port', int), ('server_listen_backlog', int), ('logging_level', str)])
+    config_params = initialize_config([('server_port', int), ('server_listen_backlog', int), ('logging_level', str), ('worker_count', int)])
     initialize_log(config_params["logging_level"])
 
     # Log config parameters at the beginning of the program to verify the configuration
@@ -21,7 +21,7 @@ def main():
     logging.debug("Server configuration: {}".format(config_params))
 
     # Initialize src and start src loop
-    server = Server(config_params["server_port"], config_params["server_listen_backlog"], generate_response)
+    server = Server(config_params["server_port"], config_params["server_listen_backlog"], config_params['worker_count'], generate_response)
     server.run()
 
 
