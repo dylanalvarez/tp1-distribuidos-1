@@ -4,11 +4,20 @@ import signal
 import socket
 from multiprocessing import Process, Queue, Manager
 
+from src.server.invalid_request import InvalidRequest
 
-def handle_client_requests(request_queue, generate_response, open_filenames):
+
+def handle_client_requests(index, request_queue, generate_response, open_filenames, available_process_indices):
     while True:
-        msg, client_sock = request_queue.get()
-        client_sock.send(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
+        asd = request_queue.get()
+        print(asd)
+        msg, client_sock = asd
+        try:
+            client_sock.send(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
+        except InvalidRequest:
+            client_sock.send(b'{"error": "invalid request"}\n')
+        finally:
+            available_process_indices.put(index)
         client_sock.close()
 
 
@@ -21,16 +30,16 @@ class Server:
         self._server_socket.listen(listen_backlog)
         self.must_exit = False
         self.generate_response = generate_response
-        self.available_process_indices = Queue()
         self.processes = []
         self.process_queues = []
         self.manager = Manager()
+        self.available_process_indices = self.manager.Queue()
         self.open_filenames = self.manager.dict()
         for index in range(10):
             self.available_process_indices.put(index)
             request_queue = Queue()
             self.process_queues.append(request_queue)
-            process = Process(target=handle_client_requests, args=(request_queue, generate_response, self.open_filenames))
+            process = Process(target=handle_client_requests, args=(index, request_queue, generate_response, self.open_filenames, self.available_process_indices))
             process.start()
             self.processes.append(process)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
@@ -64,6 +73,7 @@ class Server:
         If a problem arises in the communication with the client, the
         client socket will also be closed
         """
+        client_sock.settimeout(10)
         try:
             msg = ''
             while not (msg.endswith('\n') or self.must_exit):
@@ -74,7 +84,7 @@ class Server:
                 index = self.available_process_indices.get_nowait()
                 self.process_queues[index].put((msg, client_sock))
             except queue.Full:
-                client_sock.send(b'{"error": "service unavailable"}')
+                client_sock.send(b'{"error": "service unavailable"}\n')
                 client_sock.close()
         except OSError:
             logging.info("Error while reading socket {}".format(client_sock))

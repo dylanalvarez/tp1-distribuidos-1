@@ -10,7 +10,7 @@ from src.server.query import parse_query
 
 def get_filenames(app_id, start_timestamp, end_timestamp):
     delta = end_timestamp - start_timestamp
-    timestamps = [start_timestamp + timedelta(hours=i) for i in range(delta.days * 24 + 1)]
+    timestamps = [start_timestamp + timedelta(hours=i) for i in range(delta.seconds // 3600 + 1)]
     return [get_filename(app_id, timestamp) for timestamp in timestamps]
 
 

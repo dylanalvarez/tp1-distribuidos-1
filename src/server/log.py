@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
+from src.server.invalid_request import InvalidRequest
+
 
 @dataclass
 class Log:
@@ -13,9 +15,12 @@ class Log:
 
 
 def parse_log(log_dict):
-    return Log(
-        app_id=log_dict['app_id'],
-        message=log_dict['message'],
-        log_tags=log_dict['log_tags'],
-        timestamp=datetime.fromisoformat(log_dict['timestamp'])
-    )
+    try:
+        return Log(
+            app_id=str(log_dict['app_id']),
+            message=str(log_dict['message']),
+            log_tags=[str(tag) for tag in log_dict['log_tags']],
+            timestamp=datetime.fromisoformat(log_dict['timestamp'])
+        )
+    except (KeyError, ValueError, TypeError):
+        raise InvalidRequest
