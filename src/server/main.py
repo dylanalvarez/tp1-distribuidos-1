@@ -7,9 +7,9 @@ from src.server.process_message import process_message
 from src.server.server import Server
 
 
-def generate_response(msg, client_sock):
+def generate_response(msg, client_sock, open_filenames):
     logging.info('Message received from connection {}. Msg: {}'.format(client_sock.getpeername(), msg))
-    return process_message(msg)
+    return process_message(msg, open_filenames)
 
 
 def main():

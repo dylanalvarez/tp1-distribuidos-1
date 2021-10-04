@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from datetime import timedelta
 
 from src.server.get_filename import get_filename
@@ -26,7 +27,7 @@ def does_match(log, query):
     return True
 
 
-def search_logs(query_dict):
+def search_logs(query_dict, open_filenames):
     query = parse_query(query_dict)
     result = []
     if query.start_timestamp:
@@ -38,6 +39,8 @@ def search_logs(query_dict):
             filenames = []
     for filename in filenames:
         try:
+            while open_filenames.get(filename):
+                time.sleep(1)
             with open(filename) as file:
                 for line in file:
                     line = line[:-1]
@@ -46,4 +49,6 @@ def search_logs(query_dict):
                         result.append(line)
         except FileNotFoundError:
             pass
+        finally:
+            open_filenames[filename] = False
     return f'[{", ".join(result)}]'

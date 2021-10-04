@@ -2,13 +2,13 @@ import logging
 import queue
 import signal
 import socket
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Manager
 
 
-def handle_client_requests(request_queue, generate_response):
+def handle_client_requests(request_queue, generate_response, open_filenames):
     while True:
         msg, client_sock = request_queue.get()
-        client_sock.send(generate_response(msg[:-1], client_sock).encode('utf-8'))
+        client_sock.send(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
         client_sock.close()
 
 
@@ -24,11 +24,13 @@ class Server:
         self.available_process_indices = Queue()
         self.processes = []
         self.process_queues = []
+        self.manager = Manager()
+        self.open_filenames = self.manager.dict()
         for index in range(10):
             self.available_process_indices.put(index)
             request_queue = Queue()
             self.process_queues.append(request_queue)
-            process = Process(target=handle_client_requests, args=(request_queue, generate_response))
+            process = Process(target=handle_client_requests, args=(request_queue, generate_response, self.open_filenames))
             process.start()
             self.processes.append(process)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
