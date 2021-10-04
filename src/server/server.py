@@ -9,9 +9,7 @@ from src.server.invalid_request import InvalidRequest
 
 def handle_client_requests(index, request_queue, generate_response, open_filenames, available_process_indices):
     while True:
-        asd = request_queue.get()
-        print(asd)
-        msg, client_sock = asd
+        msg, client_sock = request_queue.get()
         try:
             client_sock.send(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
         except InvalidRequest:
