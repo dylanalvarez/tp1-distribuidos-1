@@ -4,6 +4,7 @@ import signal
 import socket
 from multiprocessing import Process, Queue, Manager, Value
 
+from src.server.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.invalid_request import InvalidRequest
 
 
@@ -21,6 +22,8 @@ def handle_client_requests(index, request_queue, generate_response, open_filenam
                 client_sock.send(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
             except InvalidRequest:
                 client_sock.send(b'{"error": "invalid request"}\n')
+            except AppIdDoesNotExist:
+                client_sock.send(b'{"error": "app id does not exist"}\n')
             finally:
                 available_process_indices.put(index)
             client_sock.close()

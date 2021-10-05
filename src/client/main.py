@@ -60,6 +60,7 @@ def main():
     send('{"query": {"app_id": "holi", "start_timestamp": "2021-01-01T00:00:00-03:00", "end_timestamp": "2021-01-01T01:30:00-03:00", "tag": "error"}}', config_params)
     send('{"query": {"app_id": "hola"}}', config_params)
     send('{"query": {"app_id": "holi", "pattern": ' + json.dumps(r'\d+') + '}}', config_params)
+    send('{"query": {"app_id": "hole", "pattern": ' + json.dumps(r'\d+') + '}}', config_params)
 
 
 if __name__ == "__main__":

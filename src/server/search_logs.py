@@ -3,6 +3,7 @@ import os
 import time
 from datetime import timedelta
 
+from src.server.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.get_filename import get_filename
 from src.server.log import parse_log
 from src.server.query import parse_query
@@ -36,7 +37,7 @@ def search_logs(query_dict, open_filenames):
         try:
             filenames = [f'logs/{query.app_id}/{filename}' for filename in os.listdir(f'logs/{query.app_id}')]
         except FileNotFoundError:
-            filenames = []
+            raise AppIdDoesNotExist
     for filename in filenames:
         try:
             while open_filenames.get(filename):

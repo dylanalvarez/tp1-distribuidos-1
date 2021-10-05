@@ -1,0 +1,2 @@
+class AppIdDoesNotExist(Exception):
+    pass
