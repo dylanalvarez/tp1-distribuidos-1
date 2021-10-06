@@ -22,6 +22,17 @@ services:
     depends_on:
       - tp1_server
 
+  tp1_client2:
+    container_name: tp1_client2
+    image: tp1_client2:latest
+    entrypoint: python3 /src/client/main.py
+    environment:
+      PYTHONPATH: /
+    networks:
+      - tp1_network
+    depends_on:
+      - tp1_server
+
 networks:
   tp1_network:
     ipam:

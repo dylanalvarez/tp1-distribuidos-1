@@ -94,7 +94,7 @@ class Server:
             try:
                 index = self.available_process_indices.get_nowait()
                 self.process_queues[index].put((msg, client_sock))
-            except _queue.Full:
+            except _queue.Empty:
                 client_sock.send(b'{"error": "service unavailable"}\n')
                 client_sock.close()
         except OSError:

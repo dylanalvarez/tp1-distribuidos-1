@@ -10,7 +10,8 @@ all:
 docker-build:
 	docker build -f ./src/server/Dockerfile -t "tp1_server:latest" .
 	docker build -f ./src/client/Dockerfile -t "tp1_client:latest" .
-	# Execute this command from time to time to clean up intermediate stages generated 
+	docker build -f ./src/client2/Dockerfile -t "tp1_client2:latest" .
+	# Execute this command from time to time to clean up intermediate stages generated
 	# during client build (your hard drive will like this :) ). Don't left uncommented if you 
 	# want to avoid rebuilding client image every time the docker-compose-up command 
 	# is executed, even when client code has not changed
