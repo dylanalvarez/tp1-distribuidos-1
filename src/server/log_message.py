@@ -3,11 +3,11 @@ import os
 import time
 
 from src.server.get_filename import get_filename
-from src.server.log import parse_log
+from src.server.models.log import Log
 
 
 def log_message(log_dict, open_filenames):
-    log = parse_log(log_dict)
+    log = Log(log_dict)
     dir_name = f'logs/{log.app_id}'
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)

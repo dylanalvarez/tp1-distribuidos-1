@@ -5,8 +5,8 @@ from datetime import timedelta
 
 from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.get_filename import get_filename
-from src.server.log import parse_log
-from src.server.query import parse_query
+from src.server.models.log import Log
+from src.server.models.query import Query
 
 
 def get_filenames(app_id, start_timestamp, end_timestamp):
@@ -29,7 +29,7 @@ def does_match(log, query):
 
 
 def search_logs(query_dict, open_filenames):
-    query = parse_query(query_dict)
+    query = Query(query_dict)
     result = []
     if query.start_timestamp:
         filenames = get_filenames(query.app_id, query.start_timestamp, query.end_timestamp)
@@ -46,7 +46,7 @@ def search_logs(query_dict, open_filenames):
             with open(filename) as file:
                 for line in file:
                     line = line[:-1]
-                    log = parse_log(json.loads(line))
+                    log = Log(json.loads(line))
                     if does_match(log, query):
                         result.append((line, log.timestamp))
         except FileNotFoundError:
