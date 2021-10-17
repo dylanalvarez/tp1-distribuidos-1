@@ -19,11 +19,11 @@ def handle_client_requests(index, request_queue, generate_response, open_filenam
         try:
             msg, client_sock = request_queue.get(timeout=1)
             try:
-                client_sock.send(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
+                client_sock.sendall(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
             except InvalidRequest:
-                client_sock.send(b'{"error": "invalid request"}\n')
+                client_sock.sendall(b'{"error": "invalid request"}\n')
             except AppIdDoesNotExist:
-                client_sock.send(b'{"error": "app id does not exist"}\n')
+                client_sock.sendall(b'{"error": "app id does not exist"}\n')
             finally:
                 available_process_indices.put(index)
             client_sock.close()
@@ -95,7 +95,7 @@ class Server:
                 index = self.available_process_indices.get_nowait()
                 self.process_queues[index].put((msg, client_sock))
             except _queue.Empty:
-                client_sock.send(b'{"error": "service unavailable"}\n')
+                client_sock.sendall(b'{"error": "service unavailable"}\n')
                 client_sock.close()
         except OSError:
             logging.info("Error while reading socket {}".format(client_sock))
