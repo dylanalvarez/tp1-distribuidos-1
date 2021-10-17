@@ -1,6 +1,6 @@
 import json
 
-from src.server.invalid_request import InvalidRequest
+from src.server.exceptions.invalid_request import InvalidRequest
 from src.server.log_message import log_message
 from src.server.search_logs import search_logs
 

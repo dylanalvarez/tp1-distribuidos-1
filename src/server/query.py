@@ -1,10 +1,9 @@
-import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from src.server.invalid_request import InvalidRequest
+from src.server.exceptions.invalid_request import InvalidRequest
 
 
 @dataclass

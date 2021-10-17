@@ -4,8 +4,8 @@ import signal
 import socket
 from multiprocessing import Process, Queue, Manager, Value
 
-from src.server.app_id_does_not_exist import AppIdDoesNotExist
-from src.server.invalid_request import InvalidRequest
+from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
+from src.server.exceptions.invalid_request import InvalidRequest
 
 
 def do_nothing(_, __):

@@ -3,7 +3,7 @@ import os
 import time
 from datetime import timedelta
 
-from src.server.app_id_does_not_exist import AppIdDoesNotExist
+from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.get_filename import get_filename
 from src.server.log import parse_log
 from src.server.query import parse_query
