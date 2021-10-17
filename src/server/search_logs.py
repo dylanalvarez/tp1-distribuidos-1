@@ -48,9 +48,10 @@ def search_logs(query_dict, open_filenames):
                     line = line[:-1]
                     log = parse_log(json.loads(line))
                     if does_match(log, query):
-                        result.append(line)
+                        result.append((line, log.timestamp))
         except FileNotFoundError:
             pass
         finally:
             open_filenames[filename] = False
-    return f'[{", ".join(result)}]'
+    result = sorted(result, key=lambda line_with_timestamp: line_with_timestamp[1])
+    return f'[{", ".join([line_with_timestamp[0] for line_with_timestamp in result])}]'

@@ -56,6 +56,7 @@ def main():
     send('{"log": {"app_id": "hola", "message": "", "timestamp": "2021-01-01T02:00:00-03:00", "log_tags": ["warn", "error"]}}', config_params)
     send(json.dumps({"log": {"app_id": "hola\nmundo", "message": "hola\nmundo", "timestamp": "2021-01-01T02:00:00-03:00", "log_tags": ["warn", "error"]}}), config_params)
     # valid queries
+    send('{"query": {"app_id": "holi"}}', config_params)
     send('{"query": {"app_id": "holi", "start_timestamp": "2021-01-01T00:00:00-03:00", "end_timestamp": "2021-01-01T00:30:00-03:00"}}', config_params)
     send('{"query": {"app_id": "holi", "start_timestamp": "2021-01-01T00:30:00-03:00", "end_timestamp": "2021-01-01T01:30:00-03:00"}}', config_params)
     send('{"query": {"app_id": "holi", "start_timestamp": "2021-01-01T00:00:00-03:00", "end_timestamp": "2021-01-01T01:30:00-03:00", "tag": "error"}}', config_params)
