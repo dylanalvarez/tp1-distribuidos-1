@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 
 from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
-from src.server.get_filename import get_filename
+from src.common.generate_filename import generate_filename
 from src.server.models.log import Log
 from src.server.models.query import Query
 
@@ -12,7 +12,7 @@ from src.server.models.query import Query
 def get_filenames(app_id, start_timestamp, end_timestamp):
     delta = end_timestamp - start_timestamp
     timestamps = [start_timestamp + timedelta(hours=i) for i in range(delta.seconds // 3600 + 1)]
-    return [get_filename(app_id, timestamp) for timestamp in timestamps]
+    return [generate_filename(app_id, timestamp) for timestamp in timestamps]
 
 
 def does_match(log, query):

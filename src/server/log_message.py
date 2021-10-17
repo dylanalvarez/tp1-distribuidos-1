@@ -2,7 +2,7 @@ import json
 import os
 import time
 
-from src.server.get_filename import get_filename
+from src.common.generate_filename import generate_filename
 from src.server.models.log import Log
 
 
@@ -11,7 +11,7 @@ def log_message(log_dict, open_filenames):
     dir_name = f'logs/{log.app_id}'
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-    filename = get_filename(log.app_id, log.timestamp)
+    filename = generate_filename(log.app_id, log.timestamp)
     while open_filenames.get(filename):
         time.sleep(1)
     open_filenames[filename] = True
