@@ -4,13 +4,8 @@ import socket
 
 from src.common.initialize_config import initialize_config
 from src.common.initialize_log import initialize_log
-
-
-def receive(socket):
-    msg = ''
-    while not msg.endswith('\n'):
-        msg += socket.recv(10).decode('utf-8')
-    return msg
+from src.common.receive_line import receive_line
+from src.common.send_line import send_line
 
 
 def send(message, config_params):
@@ -18,9 +13,9 @@ def send(message, config_params):
         try:
             s.settimeout(10)
             s.connect((config_params["server_ip"], config_params["server_port"]))
-            s.sendall(f'{message}\n'.encode('utf-8'))
+            send_line(message, s)
             print('Sent', message)
-            print('Received', receive(s))
+            print('Received', receive_line(s))
             s.close()
         except socket.timeout:
             print("Connection timed out (forgot a newline at the end?)")

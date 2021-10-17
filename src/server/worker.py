@@ -5,6 +5,7 @@ from abc import abstractmethod
 from multiprocessing import Process, Queue
 
 from src.common.do_nothing import do_nothing
+from src.common.send_line import send_line
 from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.exceptions.invalid_request import InvalidRequest
 
@@ -35,16 +36,16 @@ class Worker:
         Worker._set_sigterm_callback()
         while not must_exit.value:
             try:
-                msg, client_socket = request_queue.get(timeout=1)
+                message_dict, client_socket = request_queue.get(timeout=1)
                 try:
                     logging.info(
-                        'Message received from connection {}. Msg: {}'.format(client_socket.getpeername(), msg)
+                        'Message received from connection {}. Msg: {}'.format(client_socket.getpeername(), message_dict)
                     )
-                    client_socket.sendall(cls._process_message(msg, open_filenames).encode('utf-8'))
+                    send_line(cls._process_message(message_dict, open_filenames), client_socket)
                 except InvalidRequest:
-                    client_socket.sendall(b'{"error": "invalid request"}\n')
+                    send_line('{"error": "invalid request"}', client_socket)
                 except AppIdDoesNotExist:
-                    client_socket.sendall(b'{"error": "app id does not exist"}\n')
+                    send_line('{"error": "app id does not exist"}', client_socket)
                 finally:
                     available_process_indices.put(worker_id)
                 client_socket.close()

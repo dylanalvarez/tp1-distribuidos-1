@@ -6,6 +6,8 @@ import signal
 import socket
 from multiprocessing import Manager, Value
 
+from src.common.receive_line import receive_line
+from src.common.send_line import send_line
 from src.server.log_worker import LogWorker
 from src.server.query_worker import QueryWorker
 
@@ -59,10 +61,8 @@ class Server:
         """
         client_socket.settimeout(10)
         try:
-            message = ''
-            while not (message.endswith('\n') or bool(self.must_exit.value)):
-                message += client_socket.recv(10).decode('utf-8')
-            if not message.endswith('\n'):
+            message = receive_line(client_socket)
+            if not message:
                 return
             try:
                 self._handle_message(message, client_socket)
@@ -89,12 +89,12 @@ class Server:
 
     @staticmethod
     def _send_invalid_request(client_socket):
-        client_socket.sendall(b'{"error": "invalid request"}\n')
+        send_line('{"error": "invalid request"}', client_socket)
         client_socket.close()
 
     @staticmethod
     def _send_service_unavailable(client_socket):
-        client_socket.sendall(b'{"error": "service unavailable"}\n')
+        send_line('{"error": "service unavailable"}', client_socket)
         client_socket.close()
 
     def _accept_new_connection(self):

@@ -13,7 +13,7 @@ from src.server.worker import Worker
 class QueryWorker(Worker):
     @staticmethod
     def _process_message(message_dict, open_filenames):
-        return "RESULT: {}\n".format(QueryWorker._search_logs(message_dict, open_filenames))
+        return "RESULT: {}".format(QueryWorker._search_logs(message_dict, open_filenames))
 
     @staticmethod
     def _get_filenames(app_id, start_timestamp, end_timestamp):

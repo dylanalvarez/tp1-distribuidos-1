@@ -11,7 +11,7 @@ class LogWorker(Worker):
     @staticmethod
     def _process_message(log_dict, open_filenames):
         LogWorker._log_message(log_dict, open_filenames)
-        return "LOGGED: {}\n".format(json.dumps(log_dict))
+        return "LOGGED: {}".format(json.dumps(log_dict))
 
     @staticmethod
     def _log_message(log_dict, open_filenames):
