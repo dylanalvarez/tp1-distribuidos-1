@@ -3,8 +3,8 @@ import os
 import time
 from datetime import timedelta
 
-from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
 from src.common.generate_filename import generate_filename
+from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.models.log import Log
 from src.server.models.query import Query
 

@@ -2,105 +2,72 @@ import _queue
 import logging
 import signal
 import socket
-from multiprocessing import Process, Queue, Manager, Value
+from multiprocessing import Manager, Value
 
-from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
-from src.server.exceptions.invalid_request import InvalidRequest
-
-
-def do_nothing(_, __):
-    pass
-
-
-def handle_client_requests(index, request_queue, generate_response, open_filenames, available_process_indices, must_exit):
-    signal.signal(signal.SIGTERM, do_nothing)
-    signal.signal(signal.SIGINT, do_nothing)
-    while not must_exit.value:
-        try:
-            msg, client_sock = request_queue.get(timeout=1)
-            try:
-                client_sock.sendall(generate_response(msg[:-1], client_sock, open_filenames).encode('utf-8'))
-            except InvalidRequest:
-                client_sock.sendall(b'{"error": "invalid request"}\n')
-            except AppIdDoesNotExist:
-                client_sock.sendall(b'{"error": "app id does not exist"}\n')
-            finally:
-                available_process_indices.put(index)
-            client_sock.close()
-        except _queue.Empty:
-            pass
-    logging.debug(f'WORKER {index} exiting gracefully')
+from src.server.worker import Worker
 
 
 class Server:
-    def __init__(self, port, listen_backlog, worker_count, generate_response):
-        # Initialize src socket
+    def __init__(self, port, listen_backlog, worker_count):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.settimeout(1.0)
         self._server_socket.bind(('', port))
         self._server_socket.listen(listen_backlog)
-        self.must_exit = Value('i', False)
-        self.generate_response = generate_response
-        self.processes = []
-        self.process_queues = []
-        self.manager = Manager()
-        self.available_process_indices = self.manager.Queue()
-        self.open_filenames = self.manager.dict()
-        for index in range(worker_count):
-            self.available_process_indices.put(index)
-            request_queue = Queue()
-            self.process_queues.append(request_queue)
-            process = Process(target=handle_client_requests, args=(index, request_queue, generate_response, self.open_filenames, self.available_process_indices, self.must_exit))
-            process.start()
-            self.processes.append(process)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
-        signal.signal(signal.SIGINT, self.exit_gracefully)
 
-    def exit_gracefully(self, _, __):
-        print("Exiting gracefully")
-        self.must_exit.value = True
+        self.manager = Manager()
+        self.available_worker_ids = self.manager.Queue()
+        self.open_filenames = self.manager.dict()
+        self.must_exit = Value('i', False)
+
+        self.workers = [Worker(index, self.available_worker_ids, self.open_filenames, self.must_exit)
+                        for index in range(worker_count)]
 
     def run(self):
         """
         Dummy Server loop
 
         Server that accept a new connections and establishes a
-        communication with a client. After client with communucation
+        communication with a client. After client with communication
         finishes, servers starts to accept new connections again
         """
+        self._set_sigterm_callback()
+        for worker in self.workers:
+            worker.start()
+
         while not self.must_exit.value:
-            client_sock = self.__accept_new_connection()
-            if client_sock:
-                self.__handle_client_connection(client_sock)
+            client_socket = self._accept_new_connection()
+            if client_socket:
+                self._handle_client_connection(client_socket)
+
         self._server_socket.close()
-        for process in self.processes:
-            process.join()
+        for worker in self.workers:
+            worker.join()
         print("Exited gracefully!")
 
-    def __handle_client_connection(self, client_sock):
+    def _handle_client_connection(self, client_socket):
         """
         Read message from a specific client socket and closes the socket
 
         If a problem arises in the communication with the client, the
         client socket will also be closed
         """
-        client_sock.settimeout(10)
+        client_socket.settimeout(10)
         try:
-            msg = ''
-            while not (msg.endswith('\n') or bool(self.must_exit.value)):
-                msg += client_sock.recv(10).decode('utf-8')
-            if not msg.endswith('\n'):
+            message = ''
+            while not (message.endswith('\n') or bool(self.must_exit.value)):
+                message += client_socket.recv(10).decode('utf-8')
+            if not message.endswith('\n'):
                 return
             try:
-                index = self.available_process_indices.get_nowait()
-                self.process_queues[index].put((msg, client_sock))
+                index = self.available_worker_ids.get_nowait()
+                self.workers[index].request_queue.put((message, client_socket))
             except _queue.Empty:
-                client_sock.sendall(b'{"error": "service unavailable"}\n')
-                client_sock.close()
+                client_socket.sendall(b'{"error": "service unavailable"}\n')
+                client_socket.close()
         except OSError:
-            logging.info("Error while reading socket {}".format(client_sock))
+            logging.info("Error while reading socket {}".format(client_socket))
 
-    def __accept_new_connection(self):
+    def _accept_new_connection(self):
         """
         Accept new connections
 
@@ -110,14 +77,22 @@ class Server:
 
         # Connection arrived
         logging.info("Proceed to accept new connections")
-        c = None
+        client_socket = None
         address = None
-        while not (c or bool(self.must_exit.value)):
+        while not (client_socket or bool(self.must_exit.value)):
             try:
-                c, address = self._server_socket.accept()
-            except socket.timeout as e:
+                client_socket, address = self._server_socket.accept()
+            except socket.timeout:
                 pass
-        if not c or not address:
+        if not client_socket or not address:
             return None
         logging.info('Got connection from {}'.format(address))
-        return c
+        return client_socket
+
+    def _set_sigterm_callback(self):
+        signal.signal(signal.SIGTERM, self._exit_gracefully)
+        signal.signal(signal.SIGINT, self._exit_gracefully)
+
+    def _exit_gracefully(self, _, __):
+        print("Exiting gracefully")
+        self.must_exit.value = True
