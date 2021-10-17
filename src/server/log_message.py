@@ -14,6 +14,7 @@ def log_message(log_dict, open_filenames):
     filename = get_filename(log.app_id, log.timestamp)
     while open_filenames.get(filename):
         time.sleep(1)
+    open_filenames[filename] = True
     with open(filename, 'a+') as file:
         file.write(f'{json.dumps(log_dict)}\n')
     open_filenames[filename] = False

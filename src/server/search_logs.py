@@ -42,6 +42,7 @@ def search_logs(query_dict, open_filenames):
         try:
             while open_filenames.get(filename):
                 time.sleep(1)
+            open_filenames[filename] = True
             with open(filename) as file:
                 for line in file:
                     line = line[:-1]
