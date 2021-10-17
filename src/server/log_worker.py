@@ -1,10 +1,10 @@
-from src.server.worker import Worker
 import json
 import os
 import time
 
 from src.common.generate_filename import generate_filename
 from src.server.models.log import Log
+from src.server.worker import Worker
 
 
 class LogWorker(Worker):

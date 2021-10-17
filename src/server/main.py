@@ -21,7 +21,12 @@ def main():
     logging.debug("Server configuration: {}".format(config_params))
 
     # Initialize src and start src loop
-    server = Server(config_params["server_port"], config_params["server_listen_backlog"], config_params['log_worker_count'], config_params['query_worker_count'])
+    server = Server(
+        config_params["server_port"],
+        config_params["server_listen_backlog"],
+        config_params['log_worker_count'],
+        config_params['query_worker_count']
+    )
     server.run()
 
 

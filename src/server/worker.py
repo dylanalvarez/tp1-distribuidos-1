@@ -37,7 +37,9 @@ class Worker:
             try:
                 msg, client_socket = request_queue.get(timeout=1)
                 try:
-                    logging.info('Message received from connection {}. Msg: {}'.format(client_socket.getpeername(), msg))
+                    logging.info(
+                        'Message received from connection {}. Msg: {}'.format(client_socket.getpeername(), msg)
+                    )
                     client_socket.sendall(cls._process_message(msg, open_filenames).encode('utf-8'))
                 except InvalidRequest:
                     client_socket.sendall(b'{"error": "invalid request"}\n')

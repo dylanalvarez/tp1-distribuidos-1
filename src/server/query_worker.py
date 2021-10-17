@@ -1,4 +1,3 @@
-from src.server.worker import Worker
 import json
 import os
 import time
@@ -8,6 +7,7 @@ from src.common.generate_filename import generate_filename
 from src.server.exceptions.app_id_does_not_exist import AppIdDoesNotExist
 from src.server.models.log import Log
 from src.server.models.query import Query
+from src.server.worker import Worker
 
 
 class QueryWorker(Worker):
